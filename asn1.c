@@ -37,7 +37,8 @@ void Memory(){
       perrorz("Memory error");
    }
    else{
-      printf
+      printf ("total RAM   : %5.1f MB\n", info.totalram /(1024*1024));
+      printf();
    }
 
 }
@@ -45,4 +46,5 @@ void Memory(){
 int main() {
    SystemInfo();
    MemoryUsage();
+   Memory();
 }
