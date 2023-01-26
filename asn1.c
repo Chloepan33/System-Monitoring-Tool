@@ -10,7 +10,7 @@ void SystemInfo(){
       perror("SystemInfo error");
    }   
    else {
-      printf("###System Information");
+      printf("###System Information###\n");
       printf("System Name:  %s\n", uts.sysname);
       printf("Machine Name:  %s\n", uts.nodename);
       printf("Version:  %s\n", uts.version);
@@ -34,11 +34,13 @@ void MemoryUsage(){
 void Memory(){
    struct sysinfo info;
    if(sysinfo(&info)<0){
-      perrorz("Memory error");
+      perror("Memory error");
    }
    else{
-      printf ("total RAM   : %5.1f MB\n", info.totalram /(1024*1024));
-      printf();
+      printf ("Total RAM : %.2lf\n", info.totalram * info.mem_unit * 1e-9);
+      printf("Used RAM : %.2lf\n", (info.totalram - info.freeram)*info.mem_unit * 1e-9);
+      printf ("Total Free : %.2lf\n", (info.totalram + info.totalswap)* info.mem_unit * 1e-9);
+      printf("Used Free : %.2lf\n", (info.totalram + info.totalswap - info.freeram - info.freeswap)*info.mem_unit * 1e-9);
    }
 
 }
