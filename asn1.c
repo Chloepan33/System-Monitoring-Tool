@@ -111,17 +111,45 @@ void ShowAllBasic(int sample_size,int period){
 }
 
 int main(int argc, char *argv[]) {
-   ShowCpu(1);
-   // int sample_size = 10;
-   // int period = 1;
-   // if (argc == 1){
-   //    ShowAllBasic(sample_size,period);
-   // }
-   // else{
-   //    for(int i = 1; i < argc; i++){
 
-   //    }
-   // }
+   int sample_size = 10;
+   int period = 1;
+
+   int system_state = 0;
+   int user_state = 0;
+   int graphic_state = 0;
+   int sequential_state = 0;
+   
+
+   if (argc == 1){
+      ShowAllBasic(sample_size,period);
+   }
+   else{
+      for(int i = 1; i < argc; i++){
+         if (strcmp(argv[i],"--system") == 0){
+            system_state = 1;
+         }
+         else if (strcmp(argv[i],"--user") == 0 ){
+            user_state = 1;
+         }
+         else if (strcmp(argv[i],"--graphics") == 0){
+            graphic_state = 1;
+         }
+         else if (strcmp(argv[i],"--sequentials") == 0){
+            sequential_state = 1;
+         }
+         else if (sscanf(argv[i],"--samples=%d",&sample_size) == 1){
+            printf("The current sample size is %d\n",sample_size);
+         }
+         else if (sscanf(argv[i],"--tdelay=%d",&period) == 1){
+            printf("The current sample frequency is %d sec\n",period);
+         }
+      }
+      if(system_state == 1){
+         ShowCpu(period);
+         ShowMemory();
+      }
+   }
    
    
 }
