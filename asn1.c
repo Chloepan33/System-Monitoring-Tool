@@ -8,6 +8,8 @@
 
 
 void ShowSystemInfo(){
+   printf("----------------------------\n");
+   printf("### System Information ### \n");
    struct utsname uts;
    if (uname(&uts) < 0){
       perror("SystemInfo error");
@@ -64,7 +66,8 @@ void ShowUser(){
    }
 }
 
-void ShowCpu(int period){
+void ShowCpu(int sample_size, int period){
+   printf("----------------------------\n");
    int core_num = sysconf(_SC_NPROCESSORS_ONLN);
    printf("Number of cores: %d\n", core_num);
    unsigned long long pre[4];
@@ -101,10 +104,7 @@ void ShowAllBasic(int sample_size,int period){
    printf("----------------------------\n");
    printf("### Sessions/users ### \n");
    ShowUser();
-   printf("----------------------------\n");
    ShowCpu(period);
-   printf("----------------------------\n");
-   printf("### System Information ### \n");
    ShowSystemInfo();
    printf("----------------------------\n");
    
@@ -144,10 +144,6 @@ int main(int argc, char *argv[]) {
          else if (sscanf(argv[i],"--tdelay=%d",&period) == 1){
             printf("The current sample frequency is %d sec\n",period);
          }
-      }
-      if(system_state == 1){
-         ShowCpu(period);
-         ShowMemory();
       }
    }
    
