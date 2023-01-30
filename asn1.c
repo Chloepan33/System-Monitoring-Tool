@@ -5,6 +5,7 @@
 #include <utmp.h>
 #include <unistd.h>
 #include <string.h>
+#include <stdlib.h>
 
 
 void ShowSystemInfo(){
@@ -22,7 +23,6 @@ void ShowSystemInfo(){
       printf("Release:  %s\n", uts.release);
       printf("Architecture: %s\n", uts.machine);
     }
-
 }
 
 void ShowMemoryUsage(){
@@ -36,24 +36,56 @@ void ShowMemoryUsage(){
 
 }
 
-void ShowMemory(){
-   struct sysinfo info;
-   if(sysinfo(&info)<0){
-      perror("Memory error");
-   }
-   else{
-      long double PhysTotal = info.totalram * info.mem_unit;
-      long double PhysUsed = (info.totalram - info.freeram) * info.mem_unit;
-      long double VirTotal = (info.totalram + info.totalswap) * info.mem_unit;
-      long double VirUsed = (info.totalram + info.totalswap - info.freeram - info.freeswap) * info.mem_unit;
-      printf("%.2Lf GB / %.2Lf GB  -- %.2Lf GB / %.2Lf GB\n", PhysTotal* 1e-9, PhysUsed* 1e-9, VirTotal* 1e-9, VirUsed* 1e-9);
-      // printf ("Total RAM : %.2lf\n", info.totalram * info.mem_unit * 1e-9);
-      // printf("Used RAM : %.2lf\n", (info.totalram - info.freeram)*info.mem_unit * 1e-9);
-      // printf ("Total Free : %.2lf\n", (info.totalram + info.totalswap)* info.mem_unit * 1e-9);
-      // printf("Used Free : %.2lf\n", (info.totalram + info.totalswap - info.freeram - info.freeswap)*info.mem_unit * 1e-9);
-   }
+void ShowMemory() {
+    FILE *meminfo = fopen("/proc/meminfo", "r");
+    char line[200];
+    long totalram, freeram, bufferram, cachedram, totalswap, freeswap;
+    long phys_used, total_phys, virtual_used, total_virtual;
+
+    while(fgets(line, sizeof(line), meminfo)) {
+        if(sscanf(line, "MemTotal: %ld kB", &totalram) == 1) {
+            totalram *= 1024;
+            total_phys = totalram;
+        } else if (sscanf(line, "MemFree: %ld kB", &freeram) == 1){
+            freeram *= 1024;
+        } else if (sscanf(line, "Buffers: %ld kB", &bufferram) == 1) {
+            bufferram *= 1024;
+        } else if (sscanf(line, "Cached: %ld kB", &cachedram) == 1) {
+            cachedram *= 1024;
+            phys_used = (totalram - freeram) - (bufferram + cachedram);
+        } else if (sscanf(line, "SwapTotal: %ld kB", &totalswap) == 1) {
+            totalswap *= 1024;
+            total_virtual = totalram + totalswap;
+            virtual_used = phys_used + totalswap;
+        } else if (sscanf(line, "SwapFree: %ld kB", &freeswap) == 1) {
+            freeswap *= 1024;
+            virtual_used -= freeswap;
+            fclose(meminfo);
+        }
+    }
+    printf("%.2f GB / %.2f GB  -- %.2f GB / %.2f GB\n", phys_used * 1e-9,total_phys * 1e-9, virtual_used * 1e-9, total_virtual * 1e-9);
 
 }
+
+// void ShowMemory(){
+//    struct sysinfo info;
+//    if(sysinfo(&info)<0){
+//       perror("Memory error");
+//    }
+//    else{
+//       long double PhysTotal = info.totalram * info.mem_unit;
+//       long double PhysUsed = (info.totalram - info.freeram) * info.mem_unit;
+//       long double VirTotal = (info.totalram + info.totalswap) * info.mem_unit;
+//       long double VirUsed = (info.totalram + info.totalswap - info.freeram - info.freeswap) * info.mem_unit;
+//       printf("%.2Lf GB / %.2Lf GB  -- %.2Lf GB / %.2Lf GB\n", PhysTotal* 1e-9, PhysUsed* 1e-9, VirTotal* 1e-9, VirUsed* 1e-9);
+//       // printf ("Total RAM : %.2lf\n", info.totalram * info.mem_unit * 1e-9);
+//       // printf("Used RAM : %.2lf\n", (info.totalram - info.freeram)*info.mem_unit * 1e-9);
+//       // printf ("Total Free : %.2lf\n", (info.totalram + info.totalswap)* info.mem_unit * 1e-9);
+//       // printf("Used Free : %.2lf\n", (info.totalram + info.totalswap - info.freeram - info.freeswap)*info.mem_unit * 1e-9);
+//    }
+
+// }
+
 
 void ShowUser(){
    struct utmp *data;
@@ -104,7 +136,7 @@ void ShowAllBasic(int sample_size,int period){
    printf("----------------------------\n");
    printf("### Sessions/users ### \n");
    ShowUser();
-   ShowCpu(period);
+   ShowCpu(sample_size,period);
    ShowSystemInfo();
    printf("----------------------------\n");
    
@@ -143,6 +175,10 @@ int main(int argc, char *argv[]) {
          }
          else if (sscanf(argv[i],"--tdelay=%d",&period) == 1){
             printf("The current sample frequency is %d sec\n",period);
+         }
+         else{
+            printf("User input invalid\n");
+            exit(0);
          }
       }
    }
