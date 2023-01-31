@@ -8,21 +8,29 @@
 #include <stdlib.h>
 
 
+void moveUp(int positions){
+   printf("\x1b[%dF", positions);
+}
+
+void moveDown(int positions){
+   printf("\x1b[%dE", positions);
+}
+
 void ShowSystemInfo(){
    printf("----------------------------\n");
-   printf("### System Information ### \n");
    struct utsname uts;
    if (uname(&uts) < 0){
       perror("SystemInfo error");
    }   
    else {
-      printf("###System Information###\n");
+      printf("### System Information ### \n");
       printf("System Name:  %s\n", uts.sysname);
       printf("Machine Name:  %s\n", uts.nodename);
       printf("Version:  %s\n", uts.version);
       printf("Release:  %s\n", uts.release);
       printf("Architecture: %s\n", uts.machine);
-    }
+   }
+   printf("----------------------------\n");
 }
 
 void ShowMemoryUsage(){
@@ -88,6 +96,8 @@ void ShowMemory() {
 
 
 void ShowUser(){
+   printf("----------------------------\n");
+   printf("### Sessions/users ### \n");
    struct utmp *data;
    data = getutent();
    while(data != NULL){
@@ -98,10 +108,14 @@ void ShowUser(){
    }
 }
 
-void ShowCpu(int sample_size, int period){
+void ShowCore(){
    printf("----------------------------\n");
    int core_num = sysconf(_SC_NPROCESSORS_ONLN);
    printf("Number of cores: %d\n", core_num);
+}
+
+void ShowCpu(int period){
+   int core_num = sysconf(_SC_NPROCESSORS_ONLN);
    unsigned long long pre[4];
    unsigned long long aft[4];
    unsigned long long diff[4];
@@ -120,26 +134,35 @@ void ShowCpu(int sample_size, int period){
    }
    unsigned long long percent = diff[0] + diff[1] + diff[2];
    unsigned long long total = percent + diff[3];
-   printf("%llu %llu\n", percent, total);
    printf("CPU usage: %.2f%%\n",(double)percent/(double)total*100);
+}
+
+
+
+void ShowSystem(int sample_size, int period){
+
+   printf("----------------------------\n");
+   printf("### Memory ### (Phys.Used/Tot -- Virtual Used/Tot) \n");
+   for (int i = 0; i < sample_size; i++){
+      printf("\n");
+   }
+   ShowCore();
+   moveUp(sample_size + 2);
+   for (int m = sample_size + 1; m > 1; m--){
+      ShowMemory();
+      moveDown(m);
+      ShowCpu(period);
+      moveUp(m+1);
+   }
+   moveDown(3);
+
 }
 
 void ShowAllBasic(int sample_size,int period){
    printf("Nbr of samples: %d -- every %d secs\n", sample_size, period);
-   ShowMemoryUsage();
-   printf("----------------------------\n");
-   printf("### Memory ### (Phys.Used/Tot -- Virtual Used/Tot) \n");
-   for(int i = 0; i < sample_size; i++){
-      ShowMemory();
-      sleep(period);
-   }
-   printf("----------------------------\n");
-   printf("### Sessions/users ### \n");
+   ShowSystem(sample_size,period);
    ShowUser();
-   ShowCpu(sample_size,period);
    ShowSystemInfo();
-   printf("----------------------------\n");
-   
 }
 
 int main(int argc, char *argv[]) {
@@ -177,11 +200,25 @@ int main(int argc, char *argv[]) {
             printf("The current sample frequency is %d sec\n",period);
          }
          else{
-            printf("User input invalid\n");
+            printf("Invalid command line arguments\n");
             exit(0);
          }
       }
+      printf("Nbr of samples: %d -- every %d secs\n", sample_size, period);
+      if(user_state == 1){
+         ShowUser();
+      }
+      if(system_state == 1){
+         ShowSystem(sample_size,period);
+      }
+
+
+      ShowSystemInfo();
+
    }
    
+  
+   
+
    
 }
