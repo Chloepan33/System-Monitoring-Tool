@@ -213,9 +213,9 @@ double ShowCpu(int period)
 
 /**
  * @brief Displaying system information including memory usage and cpu usage
- * 
+ *
  * @param sample_size indicate how many times the statistics are going to be collected
- * @param period indicate how frequently to sample in seconds.
+ * @param period indicate how frequently to sample in seconds
  * @return void
  */
 void ShowSystem(int sample_size, int period)
@@ -239,6 +239,14 @@ void ShowSystem(int sample_size, int period)
    moveDown(3);
 }
 
+/**
+ * @brief Displaying cpu usage in graphic form
+ *
+ *    The number of symbol "|" is equals to number of percentage
+ *
+ * @param cpu used cpu percentage
+ * @return void
+ */
 void CpuGraph(double cpu)
 {
    printf("\t");
@@ -249,6 +257,13 @@ void CpuGraph(double cpu)
    printf("%.2f\n", cpu * 0.01);
 }
 
+/**
+ * @brief Displaying system information including memory usage and cpu usage in graphic form
+ *
+ * @param sample_size indicate how many times the statistics are going to be collected
+ * @param period indicate how frequently to sample in seconds
+ * @return void
+ */
 void ShowSystemGraph(int sample_size, int period)
 {
    printf("----------------------------\n");
@@ -271,6 +286,13 @@ void ShowSystemGraph(int sample_size, int period)
    moveDown(sample_size + 3);
 }
 
+/**
+ * @brief Displaying system information including memory usage and cpu usage in sequantial form
+ *
+ * @param sample_size indicate how many times the statistics are going to be collected
+ * @param period indicate how frequently to sample in seconds
+ * @return void
+ */
 void ShowSequentials(int sample_size, int period)
 {
    for (int i = 0; i < sample_size; i++)
@@ -285,6 +307,14 @@ void ShowSequentials(int sample_size, int period)
    }
 }
 
+/**
+ * @brief Displaying all informations including memory, cpu, user and system information in basic form
+ *       i.e. not graphic nor sequantial.
+ *
+ * @param sample_size indicate how many times the statistics are going to be collected
+ * @param period indicate how frequently to sample in seconds
+ * @return void
+ */
 void ShowAllBasic(int sample_size, int period)
 {
    printf("Nbr of samples: %d -- every %d secs\n", sample_size, period);
