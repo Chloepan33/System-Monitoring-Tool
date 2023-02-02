@@ -82,15 +82,19 @@ void ShowMemoryUsage()
 }
 
 /**
- * @brief Displaying memory information including
+ * @brief Displaying memory information, in unit of GB, including
  *    total physical memory,
  *    used physical memory,
  *    total virtual memory,
  *    used virtual memory.
  *
  *    Memories are calculated by reading file /proc/meminfo.
+ *    total physical memory = totalram
+ *    used physical memory = (totalram - freeram)  - (bufferram + cachedram + SReclaimable)
+ *    total virtual memory = totalram + total swap
+ *    used virtual memory = used physical memory + totalswap - freeswap
  *
- *
+ * @return void
  *
  */
 void ShowMemory()
@@ -139,6 +143,14 @@ void ShowMemory()
    printf("%.2f GB / %.2f GB  -- %.2f GB / %.2f GB\n", phys_used * 1e-9, total_phys * 1e-9, virtual_used * 1e-9, total_virtual * 1e-9);
 }
 
+/**
+ * @brief Displaying information of current login users, including
+ *    username,
+ *    device name,
+ *    host name for remote login.
+ * 
+ * @return void
+ */
 void ShowUser()
 {
    printf("----------------------------\n");
@@ -155,6 +167,11 @@ void ShowUser()
    }
 }
 
+/**
+ * @brief Displaying the number of cores of current system.
+ * 
+ * @return void
+ */
 void ShowCore()
 {
    printf("----------------------------\n");
@@ -162,6 +179,12 @@ void ShowCore()
    printf("Number of cores: %d\n", core_num);
 }
 
+/**
+ * @brief Displaying the utilization percentage of the CPU by reading file /proc/stat
+ * 
+ * @param period 
+ * @return double 
+ */
 double ShowCpu(int period)
 {
    int core_num = sysconf(_SC_NPROCESSORS_ONLN);
