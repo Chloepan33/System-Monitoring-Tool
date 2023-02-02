@@ -47,31 +47,32 @@ void ShowMemoryUsage(){
 void ShowMemory() {
     FILE *meminfo = fopen("/proc/meminfo", "r");
     char line[200];
-    long totalram, freeram, bufferram, cachedram, totalswap, freeswap;
+    long totalram, freeram, bufferram, cachedram, totalswap, freeswap, sre;
     long phys_used, total_phys, virtual_used, total_virtual;
 
     while(fgets(line, sizeof(line), meminfo)) {
         if(sscanf(line, "MemTotal: %ld kB", &totalram) == 1) {
-            totalram *= 1024;
-            total_phys = totalram;
+            totalram *= 1024;    
         } else if (sscanf(line, "MemFree: %ld kB", &freeram) == 1){
             freeram *= 1024;
         } else if (sscanf(line, "Buffers: %ld kB", &bufferram) == 1) {
             bufferram *= 1024;
         } else if (sscanf(line, "Cached: %ld kB", &cachedram) == 1) {
-            cachedram *= 1024;
-            phys_used = (totalram - freeram) - (bufferram + cachedram);
+            cachedram *= 1024;           
         } else if (sscanf(line, "SwapTotal: %ld kB", &totalswap) == 1) {
             totalswap *= 1024;
-            total_virtual = totalram + totalswap;
-            virtual_used = phys_used + totalswap;
         } else if (sscanf(line, "SwapFree: %ld kB", &freeswap) == 1) {
             freeswap *= 1024;
-            virtual_used -= freeswap;
+        } else if (sscanf(line, "SReclaimable: %ld kB", &sre) == 1){
+            sre *= 1024;
             fclose(meminfo);
-        }
+        }    
     }
-    printf("%.2f GB / %.2f GB  -- %.2f GB / %.2f GB\n", phys_used * 1e-9,total_phys * 1e-9, virtual_used * 1e-9, total_virtual * 1e-9);
+   total_phys = totalram;
+   phys_used = (totalram - freeram) - (bufferram + cachedram + sre);
+   total_virtual = totalram + totalswap;
+   virtual_used = phys_used + totalswap - freeswap;
+   printf("%.2f GB / %.2f GB  -- %.2f GB / %.2f GB\n", phys_used * 1e-9,total_phys * 1e-9, virtual_used * 1e-9, total_virtual * 1e-9);
 
 }
 
@@ -188,6 +189,19 @@ void ShowSystemGraph(int sample_size, int period){
 
 }
 
+void ShowSequentials(int sample_size, int period){
+   for (int i = 0; i < sample_size; i++){
+      printf(">>> iteration %d\n",i+1);
+      ShowMemoryUsage();
+      printf("----------------------------\n");
+      printf("### Memory ### (Phys.Used/Tot -- Virtual Used/Tot) \n");
+      ShowMemory();
+      double cpu = ShowCpu(period);
+      printf("----------------------------\n");
+   }
+
+}
+
 void ShowAllBasic(int sample_size,int period){
    printf("Nbr of samples: %d -- every %d secs\n", sample_size, period);
    ShowSystem(sample_size,period);
@@ -207,8 +221,7 @@ int main(int argc, char *argv[]) {
    
 
    if (argc == 1){
-      ShowSystemGraph(sample_size,period);
-      // ShowAllBasic(sample_size,period);
+      ShowAllBasic(sample_size,period);
    }
    else{
       for(int i = 1; i < argc; i++){
