@@ -114,7 +114,7 @@ void ShowCore(){
    printf("Number of cores: %d\n", core_num);
 }
 
-void ShowCpu(int period){
+double ShowCpu(int period){
    int core_num = sysconf(_SC_NPROCESSORS_ONLN);
    unsigned long long pre[4];
    unsigned long long aft[4];
@@ -135,6 +135,7 @@ void ShowCpu(int period){
    unsigned long long percent = diff[0] + diff[1] + diff[2];
    unsigned long long total = percent + diff[3];
    printf("CPU usage: %.2f%%\n",(double)percent/(double)total*100);
+   return (double)percent/(double)total*100;
 }
 
 
@@ -151,10 +152,39 @@ void ShowSystem(int sample_size, int period){
    for (int m = sample_size + 1; m > 1; m--){
       ShowMemory();
       moveDown(m);
-      ShowCpu(period);
+      double cpu = ShowCpu(period);
       moveUp(m+1);
    }
    moveDown(3);
+
+}
+
+void CpuGraph(double cpu){
+   printf("\t");
+   for (int i = 0; i < (int) cpu; i++){
+      printf("|");
+   }
+   printf("%.2f\n",cpu*0.01); 
+}
+
+void ShowSystemGraph(int sample_size, int period){
+
+   printf("----------------------------\n");
+   printf("### Memory ### (Phys.Used/Tot -- Virtual Used/Tot) \n");
+   for (int i = 0; i < sample_size; i++){
+      printf("\n");
+   }
+   ShowCore();
+   moveUp(sample_size + 2);
+   for (int m = sample_size + 1; m > 1; m--){
+      ShowMemory();
+      moveDown(m);
+      double cpu = ShowCpu(period);
+      moveDown(sample_size+1-m);
+      CpuGraph(cpu);
+      moveUp(sample_size+3);
+   }
+   moveDown(sample_size+3);
 
 }
 
@@ -177,7 +207,8 @@ int main(int argc, char *argv[]) {
    
 
    if (argc == 1){
-      ShowAllBasic(sample_size,period);
+      ShowSystemGraph(sample_size,period);
+      // ShowAllBasic(sample_size,period);
    }
    else{
       for(int i = 1; i < argc; i++){
@@ -193,10 +224,10 @@ int main(int argc, char *argv[]) {
          else if (strcmp(argv[i],"--sequentials") == 0){
             sequential_state = 1;
          }
-         else if (sscanf(argv[i],"--samples=%d",&sample_size) == 1){
+         else if (sscanf(argv[i],"--samples=%d",&sample_size) == 1 && (sample_size > 0)){
             printf("The current sample size is %d\n",sample_size);
          }
-         else if (sscanf(argv[i],"--tdelay=%d",&period) == 1){
+         else if (sscanf(argv[i],"--tdelay=%d",&period) == 1 && (period > 0)){
             printf("The current sample frequency is %d sec\n",period);
          }
          else{
