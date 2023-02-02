@@ -148,7 +148,7 @@ void ShowMemory()
  *    username,
  *    device name,
  *    host name for remote login.
- * 
+ *
  * @return void
  */
 void ShowUser()
@@ -169,7 +169,7 @@ void ShowUser()
 
 /**
  * @brief Displaying the number of cores of current system.
- * 
+ *
  * @return void
  */
 void ShowCore()
@@ -180,10 +180,10 @@ void ShowCore()
 }
 
 /**
- * @brief Displaying the utilization percentage of the CPU by reading file /proc/stat
- * 
- * @param period 
- * @return double 
+ * @brief Displaying the utilization percentage of CPU by reading file /proc/stat
+ *
+ * @param period indicate how frequently to sample in seconds
+ * @return the utilization percentage of CPU
  */
 double ShowCpu(int period)
 {
@@ -211,6 +211,13 @@ double ShowCpu(int period)
    return (double)percent / (double)total * 100;
 }
 
+/**
+ * @brief Displaying system information including memory usage and cpu usage
+ * 
+ * @param sample_size indicate how many times the statistics are going to be collected
+ * @param period indicate how frequently to sample in seconds.
+ * @return void
+ */
 void ShowSystem(int sample_size, int period)
 {
 
