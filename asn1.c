@@ -7,16 +7,40 @@
 #include <string.h>
 #include <stdlib.h>
 
+/**
+ * @brief Moves the cursor up.
+ *
+ * @param positions Number of lines to move up
+ * @return void
+ */
 void moveUp(int positions)
 {
    printf("\x1b[%dF", positions);
 }
 
+/**
+ * @brief Moves the cursor down.
+ *
+ * @param positions Number of lines to move down
+ * @return void
+ */
 void moveDown(int positions)
 {
    printf("\x1b[%dE", positions);
 }
 
+/**
+ * @brief Displaying the system information, including (in the order of)
+ *    System Name,
+ *    Machine Name,
+ *    Version,
+ *    Release,
+ *    Architecture.
+ *
+ * If fail to get system information, show error message
+ *
+ * @return void
+ */
 void ShowSystemInfo()
 {
    printf("----------------------------\n");
@@ -37,6 +61,13 @@ void ShowSystemInfo()
    printf("----------------------------\n");
 }
 
+/**
+ * @brief Displaying memory used by the current program in unit of kilobytes
+ *
+ * If fail to get memory usage, show error message
+ *
+ * @return void
+ */
 void ShowMemoryUsage()
 {
    struct rusage r_usage;
@@ -50,6 +81,18 @@ void ShowMemoryUsage()
    }
 }
 
+/**
+ * @brief Displaying memory information including
+ *    total physical memory,
+ *    used physical memory,
+ *    total virtual memory,
+ *    used virtual memory.
+ *
+ *    Memories are calculated by reading file /proc/meminfo.
+ *
+ *
+ *
+ */
 void ShowMemory()
 {
    FILE *meminfo = fopen("/proc/meminfo", "r");
@@ -95,25 +138,6 @@ void ShowMemory()
    virtual_used = phys_used + totalswap - freeswap;
    printf("%.2f GB / %.2f GB  -- %.2f GB / %.2f GB\n", phys_used * 1e-9, total_phys * 1e-9, virtual_used * 1e-9, total_virtual * 1e-9);
 }
-
-// void ShowMemory(){
-//    struct sysinfo info;
-//    if(sysinfo(&info)<0){
-//       perror("Memory error");
-//    }
-//    else{
-//       long double PhysTotal = info.totalram * info.mem_unit;
-//       long double PhysUsed = (info.totalram - info.freeram) * info.mem_unit;
-//       long double VirTotal = (info.totalram + info.totalswap) * info.mem_unit;
-//       long double VirUsed = (info.totalram + info.totalswap - info.freeram - info.freeswap) * info.mem_unit;
-//       printf("%.2Lf GB / %.2Lf GB  -- %.2Lf GB / %.2Lf GB\n", PhysTotal* 1e-9, PhysUsed* 1e-9, VirTotal* 1e-9, VirUsed* 1e-9);
-//       // printf ("Total RAM : %.2lf\n", info.totalram * info.mem_unit * 1e-9);
-//       // printf("Used RAM : %.2lf\n", (info.totalram - info.freeram)*info.mem_unit * 1e-9);
-//       // printf ("Total Free : %.2lf\n", (info.totalram + info.totalswap)* info.mem_unit * 1e-9);
-//       // printf("Used Free : %.2lf\n", (info.totalram + info.totalswap - info.freeram - info.freeswap)*info.mem_unit * 1e-9);
-//    }
-
-// }
 
 void ShowUser()
 {
