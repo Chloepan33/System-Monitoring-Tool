@@ -94,10 +94,49 @@ void ShowMemoryUsage()
  *    total virtual memory = totalram + total swap
  *    used virtual memory = used physical memory + totalswap - freeswap
  *
- * @return void
+ * @return the used physical memory
  *
  */
-void ShowMemory()
+void MemroyGraph(double pre, double post)
+{
+
+   double diff = post - pre;
+   printf("|");
+   if (diff >= 0)
+   {
+      if (diff < 0.01 || pre < 0)
+      {
+         printf("o");
+      }
+      else
+      {
+         for (int i = 0; i < (int)diff * 10; i++)
+         {
+            printf("#");
+         }
+         printf("*");
+      }
+   }
+   else
+   {
+      if (diff >= -0.01)
+      {
+         printf("@");
+      }
+      else
+      {
+         for (int i = 0; i < (int)-diff * 10; i++)
+         {
+            printf(":");
+         }
+         printf("@");
+      }
+      diff = -diff;
+   }
+   printf(" %.2f (%.2f)\n",diff,post);
+}
+
+double ShowMemory(double pre, int graph_state)
 {
    FILE *meminfo = fopen("/proc/meminfo", "r");
    char line[200];
@@ -140,7 +179,14 @@ void ShowMemory()
    phys_used = (totalram - freeram) - (bufferram + cachedram + sre);
    total_virtual = totalram + totalswap;
    virtual_used = phys_used + totalswap - freeswap;
-   printf("%.2f GB / %.2f GB  -- %.2f GB / %.2f GB\n", phys_used * 1e-9, total_phys * 1e-9, virtual_used * 1e-9, total_virtual * 1e-9);
+   printf("%.2f GB / %.2f GB  -- %.2f GB / %.2f GB", phys_used * 1e-9, total_phys * 1e-9, virtual_used * 1e-9, total_virtual * 1e-9);
+   if(graph_state == 0){
+      printf("\n");
+   }
+   else{
+      MemroyGraph(pre*1e-9, phys_used*1e-9);
+   }
+   return (double)phys_used;
 }
 
 /**
@@ -231,7 +277,7 @@ void ShowSystem(int sample_size, int period)
    moveUp(sample_size + 2);
    for (int m = sample_size + 1; m > 1; m--)
    {
-      ShowMemory();
+      double mem = ShowMemory(0,0);
       moveDown(m);
       double cpu = ShowCpu(period);
       moveUp(m + 1);
@@ -274,9 +320,10 @@ void ShowSystemGraph(int sample_size, int period)
    }
    ShowCore();
    moveUp(sample_size + 2);
+   double pre = -1;
    for (int m = sample_size + 1; m > 1; m--)
    {
-      ShowMemory();
+      pre = ShowMemory(pre,1);
       moveDown(m);
       double cpu = ShowCpu(period);
       moveDown(sample_size + 1 - m);
@@ -293,34 +340,19 @@ void ShowSystemGraph(int sample_size, int period)
  * @param period indicate how frequently to sample in seconds
  * @return void
  */
-void ShowSequentials(int sample_size, int period)
+void ShowSequentials(int sample_size, int period,int graph_state)
 {
+   double pre = 0;
    for (int i = 0; i < sample_size; i++)
    {
       printf(">>> iteration %d\n", i + 1);
       ShowMemoryUsage();
       printf("----------------------------\n");
       printf("### Memory ### (Phys.Used/Tot -- Virtual Used/Tot) \n");
-      ShowMemory();
+      pre = ShowMemory(pre,graph_state);
       double cpu = ShowCpu(period);
       printf("----------------------------\n");
    }
-}
-
-/**
- * @brief Displaying all informations including memory, cpu, user and system information in basic form
- *       i.e. not graphic nor sequantial.
- *
- * @param sample_size indicate how many times the statistics are going to be collected
- * @param period indicate how frequently to sample in seconds
- * @return void
- */
-void ShowAllBasic(int sample_size, int period)
-{
-   printf("Nbr of samples: %d -- every %d secs\n", sample_size, period);
-   ShowSystem(sample_size, period);
-   ShowUser();
-   ShowSystemInfo();
 }
 
 int main(int argc, char *argv[])
@@ -335,7 +367,11 @@ int main(int argc, char *argv[])
 
    if (argc == 1)
    {
-      ShowAllBasic(sample_size, period);
+      // printf("Nbr of samples: %d -- every %d secs\n", sample_size, period);
+      // ShowSystem(sample_size, period);
+      // ShowUser();
+      // ShowSystemInfo();
+      ShowSystemGraph(sample_size,period);
    }
    else
    {
@@ -372,15 +408,15 @@ int main(int argc, char *argv[])
          }
       }
       printf("Nbr of samples: %d -- every %d secs\n", sample_size, period);
-      if (user_state == 1)
+      if (user_state == 1 && system_state == 1)
+      {
+         printf("command combinition invalid\n");
+         exit(0);
+      }
+      else if (user_state == 1)
       {
          ShowUser();
       }
-      if (system_state == 1)
-      {
-         ShowSystem(sample_size, period);
-      }
-
       ShowSystemInfo();
    }
 }
