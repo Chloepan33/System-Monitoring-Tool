@@ -1,3 +1,13 @@
+/**
+ * @file system_monitoring_tool.c
+ * @author Zhiyu Pan (zypan03@gmail.com)
+ * @brief A simple command line program written in C that provides information about 
+ * basic system information, CPU utilization, memory utilization, and users’ information.
+ * @date 2023-02-05
+ * 
+ * 
+ */
+
 #include <stdio.h>
 #include <sys/utsname.h>
 #include <sys/resource.h>
