@@ -50,9 +50,16 @@ The program will output the following information:
 Nbr of samples: 10 -- every 1 secs
 ----------------------------
 ### Memory ### (Phys.Used/Tot -- Virtual Used/Tot) 
-6.36 GB / 8.14 GB  -- 8.24 GB / 10.14 GB
-6.36 GB / 8.14 GB  -- 8.24 GB / 10.14 GB
-6.36 GB / 8.14 GB  -- 8.24 GB / 10.14 GB
+3.68 GB / 8.14 GB  -- 3.68 GB / 10.14 GB
+3.68 GB / 8.14 GB  -- 3.68 GB / 10.14 GB
+3.69 GB / 8.14 GB  -- 3.69 GB / 10.14 GB
+3.69 GB / 8.14 GB  -- 3.69 GB / 10.14 GB
+3.69 GB / 8.14 GB  -- 3.69 GB / 10.14 GB
+3.69 GB / 8.14 GB  -- 3.69 GB / 10.14 GB
+3.69 GB / 8.14 GB  -- 3.69 GB / 10.14 GB
+3.69 GB / 8.14 GB  -- 3.69 GB / 10.14 GB
+3.68 GB / 8.14 GB  -- 3.68 GB / 10.14 GB
+3.68 GB / 8.14 GB  -- 3.68 GB / 10.14 GB
 ----------------------------
 Number of cores: 3
 CPU usage: 17.79%
