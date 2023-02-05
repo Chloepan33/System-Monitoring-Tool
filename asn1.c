@@ -431,7 +431,7 @@ int main(int argc, char *argv[])
          }
          else
          {
-            printf("Invalid command line arguments\n");
+            perror("Invalid command line arguments\n");
             exit(0);
          }
       }
@@ -440,7 +440,7 @@ int main(int argc, char *argv[])
       {
          if (system_state == 1 || sequential_state == 1 || graphic_state == 1)
          {
-            printf("command combinition invalid\n");
+            perror("Command combination invalid\n");
             exit(0);
          }
          else
