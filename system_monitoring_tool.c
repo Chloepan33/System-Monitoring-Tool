@@ -1,11 +1,10 @@
 /**
  * @file system_monitoring_tool.c
  * @author Zhiyu Pan (zypan03@gmail.com)
- * @brief A simple command line program written in C that provides information about 
+ * @brief A simple command line program written in C that provides information about
  * basic system information, CPU utilization, memory utilization, and users’ information.
  * @date 2023-02-05
- * 
- * 
+ *
  */
 
 #include <stdio.h>
@@ -54,14 +53,14 @@ void moveDown(int positions)
 void ShowSystemInfo()
 {
    printf("----------------------------\n");
-   struct utsname uts; //get system information
+   struct utsname uts; // get system information
    if (uname(&uts) < 0)
    {
-      perror("SystemInfo error"); //If fail, show error message
+      perror("SystemInfo error"); // If fail, show error message
    }
    else
    {
-      // else if success, print out detailed informations 
+      // else if success, print out detailed informations
       printf("### System Information ### \n");
       printf("System Name:  %s\n", uts.sysname);
       printf("Machine Name:  %s\n", uts.nodename);
@@ -81,64 +80,64 @@ void ShowSystemInfo()
  */
 void ShowMemoryUsage()
 {
-   struct rusage r_usage; //get current program memory usage
+   struct rusage r_usage; // get current program memory usage
    if (getrusage(RUSAGE_SELF, &r_usage) < 0)
    {
-      perror("MemoryUsage error"); //if fail, show error message
+      perror("MemoryUsage error"); // if fail, show error message
    }
    else
    {
-      //else print out memory usage in unit of kilobytes 
+      // else print out memory usage in unit of kilobytes
       printf("Memory usage: %ld kilobytes\n", r_usage.ru_maxrss);
    }
 }
 
 /**
  * @brief Displaying memory variation represented by graph
- * 
+ *
  * @param pre previous memory size
  * @param post current memory size
- * 
+ *
  * @return void
  */
 
 void MemroyGraph(double pre, double post)
 {
 
-   double diff = post - pre; //caculate difference between previous memory and current memory
-   printf("|"); //start symbol for memory graph
-   if (diff >= 0) //if memory increase
+   double diff = post - pre; // caculate difference between previous memory and current memory
+   printf("|");              // start symbol for memory graph
+   if (diff >= 0)            // if memory increase
    {
-      //if the increase amount is less than 0.01GB or it is the first time reading memory
-      if (diff < 0.01 || pre < 0) 
+      // if the increase amount is less than 0.01GB or it is the first time reading memory
+      if (diff < 0.01 || pre < 0)
       {
-         printf("o"); //use "o" to indicate
+         printf("o"); // use "o" to indicate
       }
       else
       {
-         for (int i = 0; i < (int)diff * 10; i++) //if memroy increase mroe than 0.01GB
+         for (int i = 0; i < (int)diff * 10; i++) // if memroy increase mroe than 0.01GB
          {
-            printf("#"); //use "#" to represent variation propotionally 
+            printf("#"); // use "#" to represent variation propotionally
          }
          printf("*"); // symble indicate end of graph
       }
    }
    else // else if memroy decrease
-   {  
-      //if the decrease amount is less than 0.01GB 
-      if (diff >= -0.01) 
+   {
+      // if the decrease amount is less than 0.01GB
+      if (diff >= -0.01)
       {
-         printf("@"); //use "@" to indicate
+         printf("@"); // use "@" to indicate
       }
       else
       {
          for (int i = 0; i < (int)-diff * 10; i++)
          {
-            printf(":"); //use ":" to represent variation propotionally 
+            printf(":"); // use ":" to represent variation propotionally
          }
          printf("@"); // symble indicate end of graph
       }
-      diff = -diff; //change difference to its absolute value
+      diff = -diff; // change difference to its absolute value
    }
    printf(" %.2f (%.2f)\n", diff, post);
 }
@@ -163,13 +162,13 @@ void MemroyGraph(double pre, double post)
  */
 double ShowMemory(double pre, int graph_state)
 {
-   FILE *meminfo = fopen("/proc/meminfo", "r"); //open memory information file
+   FILE *meminfo = fopen("/proc/meminfo", "r"); // open memory information file
    char line[200];
    long totalram, freeram, bufferram, cachedram, totalswap, freeswap, sre;
    long phys_used, total_phys, virtual_used, total_virtual;
 
-   //scan file to get memory information needed
-   //and convert scaned value to unit of byte
+   // scan file to get memory information needed
+   // and convert scaned value to unit of byte
    while (fgets(line, sizeof(line), meminfo))
    {
       if (sscanf(line, "MemTotal: %ld kB", &totalram) == 1)
@@ -231,15 +230,15 @@ void ShowUser()
    printf("----------------------------\n");
    printf("### Sessions/users ### \n");
    struct utmp *data;
-   data = getutent(); //get user data
+   data = getutent(); // get user data
    while (data != NULL)
    {
       if (strlen(data->ut_name) != 0)
       {
-         //print out user information 
+         // print out user information
          printf("%s %s %s\n", data->ut_name, data->ut_line, data->ut_host);
       }
-      data = getutent(); //next user
+      data = getutent(); // next user
    }
 }
 
@@ -259,7 +258,7 @@ void ShowCore()
  * @brief Displaying the utilization percentage of CPU by reading file /proc/stat
  *
  * @param period indicate how frequently to sample in seconds
- * 
+ *
  * @return the utilization percentage of CPU
  */
 double ShowCpu(int period)
@@ -270,21 +269,21 @@ double ShowCpu(int period)
    unsigned long long diff[4];
    char cpu[10];
    FILE *fp;
-   fp = fopen("/proc/stat", "r"); //open cpu information file
+   fp = fopen("/proc/stat", "r"); // open cpu information file
    fscanf(fp, "%s %llu %llu %llu %llu",
-          cpu, &pre[0], &pre[1], &pre[2], &pre[3]); //read initial cpu values 
-   sleep(period); //wait for period of time
-   rewind(fp); //refresh the file
+          cpu, &pre[0], &pre[1], &pre[2], &pre[3]); // read initial cpu values
+   sleep(period);                                   // wait for period of time
+   rewind(fp);                                      // refresh the file
    fscanf(fp, "%s %llu %llu %llu %llu",
           cpu, &aft[0], &aft[1], &aft[2], &aft[3]); // read current cpu values
    fclose(fp);
    for (int i = 0; i < 4; i++)
    {
-      diff[i] = aft[i] - pre[i]; // caculate differences 
+      diff[i] = aft[i] - pre[i]; // caculate differences
    }
    unsigned long long percent = diff[0] + diff[1] + diff[2];
    unsigned long long total = percent + diff[3];
-   printf("CPU usage: %.2f%%\n", (double)percent / (double)total * 100); //caculate cpu usage 
+   printf("CPU usage: %.2f%%\n", (double)percent / (double)total * 100); // caculate cpu usage
    return (double)percent / (double)total * 100;
 }
 
@@ -294,7 +293,7 @@ double ShowCpu(int period)
  *    The number of symbol "|" is equals to number of percentage
  *
  * @param cpu used cpu percentage
- * 
+ *
  * @return void
  */
 void CpuGraph(double cpu)
@@ -313,7 +312,7 @@ void CpuGraph(double cpu)
  * @param sample_size indicate how many times the statistics are going to be collected
  * @param period indicate how frequently to sample in seconds
  * @param graphic_state indicate whether or not to show graphics
- * 
+ *
  * @return void
  */
 void ShowSystem(int sample_size, int period, int graphic_state)
@@ -323,16 +322,16 @@ void ShowSystem(int sample_size, int period, int graphic_state)
    printf("### Memory ### (Phys.Used/Tot -- Virtual Used/Tot) \n");
    for (int i = 0; i < sample_size; i++)
    {
-      printf("\n"); //leave space for memory information
+      printf("\n"); // leave space for memory information
    }
    ShowCore();
    moveUp(sample_size + 2);
    double pre = -1;
    for (int m = sample_size + 1; m > 1; m--)
    {
-      pre = ShowMemory(pre, graphic_state); //print out memory information 
+      pre = ShowMemory(pre, graphic_state); // print out memory information
       moveDown(m);
-      double cpu = ShowCpu(period); //update cpu usage
+      double cpu = ShowCpu(period); // update cpu usage
       if (graphic_state == 0)
       {
          moveUp(m + 1);
@@ -347,14 +346,13 @@ void ShowSystem(int sample_size, int period, int graphic_state)
    moveDown(sample_size * graphic_state + 3);
 }
 
-
 /**
  * @brief Displaying system information including memory usage and cpu usage in sequantial form
  *
  * @param sample_size indicate how many times the statistics are going to be collected
  * @param period indicate how frequently to sample in seconds
  * @param graphic_state indicate whether or not to show graphics
- * 
+ *
  * @return void
  */
 void ShowSequentials(int sample_size, int period, int graph_state)
@@ -366,16 +364,19 @@ void ShowSequentials(int sample_size, int period, int graph_state)
       ShowMemoryUsage();
       printf("----------------------------\n");
       printf("### Memory ### (Phys.Used/Tot -- Virtual Used/Tot) \n");
-      for (int m = 0; m < i; m++){
+      for (int m = 0; m < i; m++)
+      {
          printf("\n");
       }
       pre = ShowMemory(pre, graph_state);
-       for (int c = 1; c < sample_size - i; c++){
+      for (int c = 1; c < sample_size - i; c++)
+      {
          printf("\n");
       }
       printf("----------------------------\n");
       double cpu = ShowCpu(period);
-      if(graph_state == 1){
+      if (graph_state == 1)
+      {
          CpuGraph(cpu);
       }
       printf("----------------------------\n");
@@ -384,14 +385,14 @@ void ShowSequentials(int sample_size, int period, int graph_state)
 
 int main(int argc, char *argv[])
 {
-   //set default value of sample size and sampled frequency 
-   int sample_size = 10; 
+   // set default value of sample size and sampled frequency
+   int sample_size = 10;
    int period = 1;
 
-   int count_int = 0; //count how many integers user has inputed 
-   int tem_int = 0; // store input integer temporarlity 
+   int count_int = 0; // count how many integers user has inputed
+   int tem_int = 0;   // store input integer temporarlity
 
-   //to indicate whether each flag is activate or not
+   // to indicate whether each flag is activate or not
    int system_state = 0;
    int user_state = 0;
    int graphic_state = 0;
@@ -399,7 +400,7 @@ int main(int argc, char *argv[])
 
    if (argc == 1) // if user enter 0 command line arguments
    {
-      //show defalut information
+      // show defalut information
       printf("Nbr of samples: %d -- every %d secs\n", sample_size, period);
       ShowSystem(sample_size, period, graphic_state);
       ShowUser();
@@ -407,10 +408,10 @@ int main(int argc, char *argv[])
    }
    else
    {
-      //scan all entered arguments 
+      // scan all entered arguments
       for (int i = 1; i < argc; i++)
       {
-         //if valid arguments enterd, activiate corresponding state 
+         // if valid arguments enterd, activiate corresponding state
          if (strcmp(argv[i], "--system") == 0)
          {
             system_state = 1;
@@ -427,7 +428,7 @@ int main(int argc, char *argv[])
          {
             sequential_state = 1;
          }
-         //if sample size or frequency changed, update it and show message with current value
+         // if sample size or frequency changed, update it and show message with current value
          else if (sscanf(argv[i], "--samples=%d", &sample_size) == 1 && (sample_size > 0))
          {
             printf("The current sample size is %d\n", sample_size);
@@ -437,17 +438,21 @@ int main(int argc, char *argv[])
             printf("The current sample frequency is %d sec\n", period);
          }
          // if integer entered
-         else if(sscanf(argv[i], "%d", &tem_int) == 1 && (tem_int > 0)){
-            if (count_int == 2){
-               printf("To many input integers!\n"); //if already have 2 integers, display error message
+         else if (sscanf(argv[i], "%d", &tem_int) == 1 && (tem_int > 0))
+         {
+            if (count_int == 2)
+            {
+               printf("To many input integers!\n"); // if already have 2 integers, display error message
                exit(0);
             }
-            else if (count_int == 1){ // if only 1 integer enterd, store the second one as new frequency 
+            else if (count_int == 1)
+            { // if only 1 integer enterd, store the second one as new frequency
                period = tem_int;
                tem_int = 0;
                count_int = 2;
             }
-            else if(count_int == 0){ //if it is the first integer, store the value as new sample size
+            else if (count_int == 0)
+            { // if it is the first integer, store the value as new sample size
                sample_size = tem_int;
                tem_int = 0;
                count_int = 1;
@@ -455,45 +460,38 @@ int main(int argc, char *argv[])
          }
          else
          {
-            perror("Invalid command line arguments\n"); //display error message for any other arguments
+            perror("Invalid command line arguments\n"); // display error message for any other arguments
             exit(0);
          }
       }
-      //show current sample size and frequency 
+      // show current sample size and frequency
       printf("Nbr of samples: %d -- every %d secs\n", sample_size, period);
-      if (user_state == 1) //if user state is avtivate
+      if (user_state == 1) // if user state is avtivate
       {
          if (system_state == 1 || sequential_state == 1 || graphic_state == 1)
          {
-            perror("Command combination invalid\n"); //any combination with other state is considerd as invalid
+            perror("Command combination invalid\n"); // any combination with other state is considerd as invalid
             exit(0);
          }
          else
          {
-            ShowUser(); //if only user state is activated, only display user information
+            ShowUser(); // if only user_only state is activated, only display user information
          }
       }
-      else if (system_state == 1)
+      else if (sequential_state == 1) // if only requird to display system information
       {
-         if (sequential_state == 1)
-         {
-            ShowSequentials(sample_size, period, graphic_state);
-         }
-         else
-         {
-            ShowSystem(sample_size, period, graphic_state);
-         }
-      }
-      else if (sequential_state == 1)
-      {
-         ShowSequentials(sample_size, period, graphic_state);
-         ShowUser();
+         ShowSequentials(sample_size, period, graphic_state); // display system info in sequential form
       }
       else
       {
-         ShowSystem(sample_size, period, graphic_state);
-         ShowUser();
+         ShowSystem(sample_size, period, graphic_state); // other wise display system info in defalut form
       }
-      ShowSystemInfo();
+
+      if (system_state == 0) //if system_only state is not activate
+      {
+         ShowUser(); //show user information
+      }
+
+      ShowSystemInfo(); //show basic system information 
    }
 }
