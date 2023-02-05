@@ -119,6 +119,8 @@ The program will display “`Command combination invalid`” error message.
 
 Any other user input will lead to “`Invalid command line arguments`” error message. 
 
+---
+
 ### More information
 
 The program displaying information including user usage and system usage. 
@@ -129,9 +131,10 @@ For system usage, it displays total utilization of the CPU and memory.
 
 Memory information are displayed in unit of GB, including total physical memory, used physical memory, total virtual memory and used virtual memory.
 
-$$
-\begin{align}\text{total physical memory} &= \text{totalram}\\ \text{used physical memory} &= (\text{totalram} - \text{freeram})  - (\text{bufferram} + \text{cachedram} + \text{SReclaimable}) \\   \text{total virtual memory} &= \text{totalram} + \text{total swap}\\  \text{used virtual memory }&= \text{used physical memory} + \text{totalswap - freeswap}\end{align}
-$$
+- total physical memory = totalram
+- used physical memory = (totalram - freeram) - (bufferram + cachedram + SReclaimable)
+- total virtual memory = totalram + total swap
+- used virtual memory = used physical memory + totalswap - freeswap
 
 Calculated by reading file /proc/meminfo.  
 
@@ -141,6 +144,8 @@ For graphical representations.
 - for memory utilization: showing the variation of memory used
     - if memory increase but less then 0.01 GB, “`|o`” will be displayed, otherwise if memory increase “`######*`” will be shown
     - if memory decrease but less then 0.01 GB, “`|@`” will be displayed, otherwise if memory decrease “`:::::@`” will be shown
+
+---
 
 ### How do I solve the problem
 
@@ -154,4 +159,6 @@ Then I start writing codes for the main function so that it could scan the user�
 
 Last I add documentation, improve it with error handling and test the code. 
 
-Documentations for functions are included with the code.
+---
+
+Documentations for the functions are included with the code.
